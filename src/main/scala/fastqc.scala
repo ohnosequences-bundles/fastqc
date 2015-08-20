@@ -6,22 +6,28 @@ import java.io.File
 
 abstract class Fastqc(val version: String) extends Bundle() {
 
-  val usrbin = "/usr/bin/"
-  val fastqcDir = "FastQC"
-
   val instructions: AnyInstructions = {
+    val fastqc = "FastQC/fastqc"
+    val fastqcZip = s"fastqc_v${version}.zip"
+
     cmd("wget")(
-      s"http://s3-eu-west-1.amazonaws.com/resources.ohnosequences.com/fastqc/0${version}/fastqc_v${version}.zip",
-      "-O", s"fastqc_v${version}.zip"
+      s"http://s3-eu-west-1.amazonaws.com/resources.ohnosequences.com/fastqc/${version}/${fastqcZip}",
+      "-O", fastqcZip
     ) -&-
-    cmd("unzip")(s"fastqc_v${version}.zip") -&-
-    cmd("chmod")(
-      "+x", new File(s"${fastqcDir}/fastqc").getAbsolutePath
-    ) -&-
-    cmd("ln")(
-      "-s", new File(s"${fastqcDir}/fastqc").getAbsolutePath, s"${usrbin}/fastqc"
-    ) -&-
+    cmd("unzip")(fastqcZip) -&-
+    cmd("chmod")("+x", fastqc) -&-
+    cmd("ln")("-s", fastqc, "/usr/bin/fastqc") -&-
     say(s"${bundleName} is installed")
   }
 
+  def fastqc(args: String*): CmdInstructions = cmd("fastqc")(args: _*)
+
 }
+
+case object testFastqc extends Fastqc(version = "")
+
+case object fastqcCompat extends Compatible(
+  amzn_ami_64bit(Ireland, Virtualization.HVM)(1),
+  testFastqc,
+  generated.metadata.Bundles
+)
