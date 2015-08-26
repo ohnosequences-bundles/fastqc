@@ -6,7 +6,7 @@ import java.io.File
 
 abstract class Fastqc(val version: String) extends Bundle() {
 
-  val instructions: AnyInstructions = {
+  def instructions: AnyInstructions = {
     val fastqc = "FastQC/fastqc"
     val fastqcZip = s"fastqc_v${version}.zip"
 
@@ -16,18 +16,10 @@ abstract class Fastqc(val version: String) extends Bundle() {
     ) -&-
     cmd("unzip")(fastqcZip) -&-
     cmd("chmod")("+x", fastqc) -&-
-    cmd("ln")("-s", fastqc, "/usr/bin/fastqc") -&-
+    cmd("ln")("-s", new File(fastqc).getCanonicalPath, "/usr/bin/fastqc") -&-
     say(s"${bundleName} is installed")
   }
 
   def fastqc(args: String*): CmdInstructions = cmd("fastqc")(args: _*)
 
 }
-
-case object testFastqc extends Fastqc(version = "")
-
-case object fastqcCompat extends Compatible(
-  amzn_ami_64bit(Ireland, Virtualization.HVM)(1),
-  testFastqc,
-  generated.metadata.Bundles
-)
