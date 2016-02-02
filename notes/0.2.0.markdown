@@ -1,0 +1,1 @@
+update statika to 2.0.0-M5 and build plugin to a stable version
