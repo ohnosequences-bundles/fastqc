@@ -25,8 +25,7 @@ abstract class FastQC(val version: String) extends Bundle() { fastqc =>
 
   def instructions: AnyInstructions = downloadZip -&- unzip -&- makeExecutable -&- linkBinary
 
-  def runFastQC(args: String*): CmdInstructions = cmd("fastqc")(args: _*)
-
+  def run(args: String*): CmdInstructions = cmd("fastqc")(args: _*)
 }
 
 ```
